@@ -1,0 +1,5 @@
+
+$ DC_IMG=j11-dc # arbitrary name, feel free to inline below
+$ docker build -t $DC_IMG .
+$ . sup/docker_start $DC_IMG
+$ dr uname -a
