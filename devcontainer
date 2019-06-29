@@ -21,7 +21,7 @@ fi
 __dc_run() {
 	docker exec -i \
 		$__DC_ARGS \
-		bash -lc "$*"
+		sh -lc "$*"
 }
 
 defalias() {
@@ -86,7 +86,6 @@ main() {
 	cont=$(docker run -d \
 		$run_args \
 		${cname:+--name "$cname"} \
-		-p 2222:22 \
 		-e "WORKSPACE=$workspace" \
 		-v "$PWD:$workspace" \
 		--entrypoint /bin/sh \
