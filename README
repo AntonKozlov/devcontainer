@@ -1,5 +1,5 @@
 
-$ DC_IMG=j11-dc # arbitrary name, feel free to inline below
-$ docker build -t $DC_IMG .
-$ . sup/docker_start $DC_IMG
+```
+$ . devcontainer ubuntu:14.04
 $ dr uname -a
+```

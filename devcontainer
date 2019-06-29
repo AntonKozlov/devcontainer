@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+
+err() {
+	echo "$@" >&2
+}
+
+printhelp() {
+	err "Usage: . $(basename $1) [OPTION]... IMG"
+	err "Start docker container with current dir mounted and user mirrored"
+	err
+	err "Options:"
+	err "  -n CONTAINER           name of container"
+	err "  -w WORKSPACE           workspace directory name inside of container"
+}
+
+if [ $BASH_SOURCE = $0 ]; then
+	printhelp $0
+	exit 1
+fi
+
+__dc_run() {
+	docker exec -i \
+		$__DC_ARGS \
+		bash -lc "$*"
+}
+
+defalias() {
+	eval "$1() { __dc_run \$@; }"
+}
+
+main() {
+	local OPTIND=1
+	local OPTARG
+	local opt
+
+	local workspace=/p
+	local alias=dr
+
+	local run_args=""
+	__DC_ARGS=""
+	while getopts n:r:e:w:k: opt; do
+		case $opt in
+		r) 
+			run_args="$run_args $OPTARG"
+			;;
+		n) 
+			local cname="$OPTARG"
+			;;
+		w) 
+			local workspace="$OPTARG" 
+			;;
+		e) 
+			__DC_ARGS="$__DC_ARGS $OPTARG"
+			;;
+		a)	
+			local alias="$OPTARG"
+			;;
+		esac
+	done
+	shift $((OPTIND - 1))
+
+	if [ -t 0 ]; then
+		__DC_ARGS=" $__DC_ARGS -t"
+	fi
+
+	if [ "$cname" ] && [ $(docker ps -aqf "name=$cname") ]; then
+		__DC_ARGS="$__DC_ARGS -u user $cname"
+		__dc_run true
+		if [ $? != 0 ]; then
+			err "Container \"$cname\" presents but cannot be used"
+			return 1
+		fi
+		defalias $alias
+		return 0
+	fi
+
+	local dockerimage="$1"
+	if ! [ "$dockerimage" ]; then
+		err "No image name provided"
+		err
+		printhelp $BASH_SOURCE
+		return 1
+	fi
+
+	local cont # don't eat exit code
+	cont=$(docker run -d \
+		$run_args \
+		${cname:+--name "$cname"} \
+		-p 2222:22 \
+		-e "WORKSPACE=$workspace" \
+		-v "$PWD:$workspace" \
+		--entrypoint /bin/sh \
+		$dockerimage \
+		-c 'while :; do sleep 3600; done')
+
+	if [ $? != 0 ] && [ $cont ]; then
+		docker rm $cont >/dev/null
+		return 1
+	fi
+
+	docker cp $(dirname $BASH_SOURCE)/container/. $cont:/.
+	__DC_ARGS="$__DC_ARGS $cont"
+	__dc_run /usr/local/sbin/init.sh
+	__DC_ARGS="-u user $__DC_ARGS"
+
+	defalias $alias
+	echo $cont
+}
+
+bootstrap() {
+	main "$@"
+	local retcode=$?
+
+	unset err
+	unset printhelp
+	unset main
+	unset bootstrap
+	unset defalias
+
+	return $retcode
+}
+
+bootstrap "$@"
