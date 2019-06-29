@@ -37,10 +37,10 @@ $ . devcontainer -n mycontname
 If you like other alias name instead of `dr` (for example, `rundoc`):
 
 ```
-$ . devcontainer -a runcont ...
+$ . devcontainer -a rundoc ...
 ```
 
-If you'd like to use <kbd>CTRL</kbd>+<kbd>P</kbd> in interactive session (docker by default assigns it to detach prefix):
+Docker by default uses <kbd>CTRL</kbd>+<kbd>P</kbd> as detach prefix. If you want to change the prefix, i.e. to more pleasant work in interactive session with Emacs-like shortcuts:
 
 ```
 $ . devcontainer -e "--detach-keys ctrl-_"
