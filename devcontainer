@@ -22,7 +22,9 @@ if [ $BASH_SOURCE = $0 ]; then
 fi
 
 __dc_run() {
-	docker exec -i $__DC_ARGS /bin/sh /usr/local/bin/exec.sh user "$@"
+	docker exec -i \
+		$__DC_ARGS \
+		sh -lc "$*"
 }
 
 defalias() {
@@ -65,7 +67,7 @@ main() {
 	fi
 
 	if [ "$cname" ] && [ $(docker ps -aqf "name=$cname") ]; then
-		__DC_ARGS="$__DC_ARGS $cname"
+		__DC_ARGS="$__DC_ARGS -u user $cname"
 		__dc_run true
 		if [ $? != 0 ]; then
 			err "Container \"$cname\" presents but cannot be used"
@@ -101,6 +103,7 @@ main() {
 	docker cp $(dirname $BASH_SOURCE)/container/. $cont:/.
 	__DC_ARGS="$__DC_ARGS $cont"
 	__dc_run /usr/local/sbin/init.sh
+	__DC_ARGS="-u user $__DC_ARGS"
 
 	defalias $alias
 	echo $cont
