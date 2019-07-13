@@ -28,16 +28,22 @@ Interactive session:
 $ dr sh # or bash, or ...
 ```
 
-If you accidentally lost a terminal with devcontainer setup (suppose container name is `mycontname`): 
+If you accidentally lost a terminal with devcontainer setup (suppose container name or hash is `mycont`):
 
 ```
-$ . devcontainer -n mycontname
+$ . devcontainer -C mycont
 ```
 
-If you like other alias name instead of `dr` (for example, `rundoc`):
+If you like other alias name (alias binds to specific container):
 
 ```
-$ . devcontainer -a rundoc ...
+$ . devcontainer -a ra alpine
+$ . devcontainer -a ru ubuntu
+$ du cat /etc/issue
+Ubuntu 18.04.2 LTS \n \l
+$ da cat /etc/issue
+Welcome to Alpine Linux 3.10
+Kernel \r on an \m (\l)
 ```
 
 Docker by default uses <kbd>CTRL</kbd>+<kbd>P</kbd> as detach prefix. If you want to change the prefix, i.e. to more pleasant work in interactive session with Emacs-like shortcuts:
